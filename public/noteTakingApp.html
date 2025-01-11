@@ -1,5 +1,5 @@
 <html>
-<body style="margin: 0; padding: 0; overflow: hidden; background-color: white;">
+<body style="margin: 0; padding: 0; background-color: white;">
     <!-- Navigation / Drawing Menu - Always on Top -->
     <style>
         .navbar {
@@ -55,7 +55,7 @@
             <a href="#">Link 3</a>
         </div>
         
-        <input class="select" id="drawSize" oninput="setDrawSize();" type="range" min="1" max="101" value="11" step="10">
+        <input class="select" id="drawSize" oninput="setDrawSize();" type="range" min="2" max="50" value="2" step="2">
 
         <div class="select" onclick="setDrawColor('Black');" style="background-color: Black;">Black</div>
         <div class="select" onclick="setDrawColor('Blue');" style="background-color: Blue;">Blue</div>
@@ -99,39 +99,66 @@ function toggleDropdown() {
     }
 }
 
-// initialize canvas
-var canvas = document.getElementById("drawingCanvas");
-var ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;  
-canvas.height = window.innerHeight;
-canvas.style.width = ""+ window.innerWidth +"px";   // stretch canvas to fit screen
-canvas.style.height = ""+ window.innerHeight +"px"; 
-
-// draw functions
+// draw functions from html buttons
 drawColor = "Black";
 function setDrawColor(c) {
     drawColor = c;
 }
 
-drawSize = 11;
+drawSize = 2;
 function setDrawSize() {
     drawSize = document.getElementById("drawSize").value;
 }
 
-ctx.fillStyle = drawColor;
-ctx.fillRect(0, 0, canvas.width, canvas.height);
+// initialize canvas
+var canvas = document.getElementById("drawingCanvas");
+var ctx = canvas.getContext("2d");
+
+// pdf A4 size: 8.3" by 11.7" 400 PPI
+// https://stackoverflow.com/questions/3455016/how-are-pdf-sizes-specified
+canvas.width = 3307;  
+canvas.height = 4677;
+// canvas.style.width = ""+ window.innerWidth +"px";   // stretch canvas to fit screen
+// canvas.style.height = ""+ window.innerHeight +"px"; 
+
+// draw college rule lines
+
+// // draw lines down page, each 9/32" spacing
+// ctx.fillStyle = "Blue"
+// for (var i = (9/32) / 11.7 * canvas.height; i < canvas.height; i += (9/32) / 11.7 * canvas.height) {
+//     ctx.fillRect(0, Math.floor(i), canvas.width, 2);
+// }
+
+// // left margin at 1.25" out of 8.3" width page
+// ctx.fillStyle = "Red";
+// ctx.fillRect(Math.floor( 1.25/8.3 * canvas.width ), 0, 2, canvas.height);
+
+var collegePaper = new Image();
+    collegePaper.src = "college-ruled-lined-paper_191200.png";
+    collegePaper.onload = function() {
+        ctx.drawImage(collegePaper, 0, 0, canvas.width, canvas.height);
+    }
+
+
+// ctx.fillStyle = drawColor;
+// ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 var touchDown = false;
 var prevX = 0;
 var prevY = 0;
 
 canvas.addEventListener("pointerdown", function(e) {
-    prevX = e.x;
-    prevY = e.y;
+    touchDown = true;
+
+    var x = e.x + window.pageXOffset;
+    var y = e.y + window.pageYOffset
+
+    prevX = x;
+    prevY = y;
 
     ctx.fillStyle = drawColor;
     ctx.beginPath();
-    ctx.arc(e.x, e.y, drawSize, 0, 2 * Math.PI, false);
+    ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
     ctx.fill();
 })
 
@@ -139,12 +166,15 @@ canvas.addEventListener("pointermove", function(e) {
     // event.preventDefault(); // no scroll
     
     if (touchDown) {
+        var x = e.x + window.pageXOffset;
+        var y = e.y + window.pageYOffset
+
         // get length from previous xy to current xy and linear interpolate to draw a solid line
-        var c = Math.ceil( Math.sqrt((e.x - prevX) ** 2 + (e.y - prevY) ** 2) );
+        var c = Math.ceil( Math.sqrt((x - prevX) ** 2 + (y - prevY) ** 2) );
 
         // normalized direction of stroke
-        var dirX = (e.x - prevX) / c; 
-        var dirY = (e.y - prevY) / c;
+        var dirX = (x - prevX) / c; 
+        var dirY = (y - prevY) / c;
 
         if (c > drawSize) {
             for (var i = 0; i * drawSize < c; i++) {
@@ -157,66 +187,23 @@ canvas.addEventListener("pointermove", function(e) {
 
         ctx.fillStyle = drawColor;
         ctx.beginPath();
-        ctx.arc(e.x, e.y, drawSize, 0, 2 * Math.PI, false);
+        ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
         ctx.fill();
 
-        prevX = e.x;
-        prevY = e.y;
+        prevX = x;
+        prevY = y;
     }
 })
 
-
-// or with mouse for testing
-
-canvas.addEventListener("mousedown", function(e) {
-    touchDown = true;
-
-    prevX = e.x;
-    prevY = e.y;
-
-    ctx.fillStyle = drawColor;
-    ctx.beginPath();
-    ctx.arc(e.x, e.y, drawSize, 0, 2 * Math.PI, false);
-    ctx.fill();
-})
-
-canvas.addEventListener("mousemove", function(e) {
-    if (touchDown) {
-        // get length from previous xy to current xy and linear interpolate to draw a solid line
-        var c = Math.ceil( Math.sqrt((e.x - prevX) ** 2 + (e.y - prevY) ** 2) );
-
-        // normalized direction of stroke
-        var dirX = (e.x - prevX) / c; 
-        var dirY = (e.y - prevY) / c;
-
-        if (c > drawSize) {
-            for (var i = 0; i * drawSize < c; i++) {
-                ctx.fillStyle = drawColor;
-                ctx.beginPath();
-                ctx.arc(prevX + dirX * drawSize * i, prevY + dirY * drawSize * i, drawSize, 0, 2 * Math.PI, false);
-                ctx.fill();
-            }
-        }
-
-        ctx.fillStyle = drawColor;
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, drawSize, 0, 2 * Math.PI, false);
-        ctx.fill();
-
-        prevX = e.x;
-        prevY = e.y;
-    }
-})
-
-canvas.addEventListener("mouseup", function(e) {
+canvas.addEventListener("pointerup", function(e) {
     touchDown = false;
 })
 
-window.oncontextmenu = function(event) {
-     event.preventDefault();
-     event.stopPropagation();
-     return false;
-};
+// window.oncontextmenu = function(event) {
+//      event.preventDefault();
+//      event.stopPropagation();
+//      return false;
+// };
 
 </script>    
 </body>
