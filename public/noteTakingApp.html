@@ -83,16 +83,17 @@
             touch-action: none;
 
             background-image: url("college-ruled-lined-paper_191200.png");
+            background-size: cover;
 
             /*border-style: solid;*/
             /*border-color: #A4FCD4;*/
             /*border-width: 20px;*/
 
-            font-smooth: never;
+            /* font-smooth: never;
             -webkit-font-smoothing : none;
 
             image-rendering: pixelated;
-            image-rendering: crisp-edges;
+            image-rendering: crisp-edges; */
         }
     </style>
 
@@ -146,8 +147,8 @@ canvas.style.marginLeft = "0px";
 // ctx.fillStyle = "Red";
 // ctx.fillRect(Math.floor( 1.25/8.3 * canvas.width ), 0, 2, canvas.height);
 
-// var collegePaper = new Image();
-//     collegePaper.src = "college-ruled-lined-paper_191200.png";
+// var collegePaper = document.createElement('img');
+//     collegePaper.src = "./college-ruled-lined-paper_191200.png";
 //     collegePaper.onload = function() {
 //         ctx.drawImage(collegePaper, 0, 0, canvas.width, canvas.height);
 //     }
