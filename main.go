@@ -1,7 +1,7 @@
 package main
 
 import (
-	"net"
+	// "net"
 	"net/http"
 	// "strings"
 	// "encoding/json"
@@ -28,8 +28,18 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("readPassErr:", err2)
 	}
 
-	if string(message) != *password {
+	if string(message) != "password" {
 		return  //if password wrong don't let gamer connect
+	}
+
+	// receive drawing commands
+	for {
+		_, message, err := c.ReadMessage() //ReadMessage blocks until message received
+		if err != nil {
+			fmt.Println("readDrawCommandErr:", err)
+		}
+
+		fmt.Println(message)
 	}
 }
 
