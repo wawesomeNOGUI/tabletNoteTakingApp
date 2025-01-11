@@ -46,11 +46,19 @@
             text-decoration: none;
             display: block;
         }
+
+        /* Links inside the dropdown */
+        .dropdown-content div:hover {
+            background: #ddd;
+            color: black;
+            cursor: pointer;
+        }
     </style>
 
     <div class="navbar">
         <div class="select" id="file" onclick="toggleDropdown();">File</div>
         <div class="dropdown-content" id="fileDropdown">
+            <div id="fileName" contentEditable="true">Filename.png</div>
             <div onclick="saveNote();">Save</div>
             <input id="inputFile" type="file" accept="image/png, image/jpeg" oninput="loadFile();"></input>
         </div>
@@ -151,13 +159,25 @@ function loadFile() {
         note.onload = function() {
             ctx.drawImage(note, 0, 0);
         }
-    // var note = window.createImageBitmap(myFile);
 }
 //================================================
 
 //============== Save Note =======================
-function saveNote() {
+const link = document.createElement( 'a' );
+link.style.display = 'none';
+document.body.appendChild( link );
 
+function save( blob, filename ) {
+    link.href = URL.createObjectURL( blob );
+    link.download = filename;
+    link.click();
+}
+
+function saveNote() {
+    // var note = canvas.toDataURL('image/png');
+    canvas.toBlob(function(blob) {
+        save(blob, document.getElementById("fileName").innerText);
+    });
 }
 //================================================
 
