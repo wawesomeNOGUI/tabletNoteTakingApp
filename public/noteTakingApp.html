@@ -3,6 +3,7 @@
     <!-- Navigation / Drawing Menu - Always on Top -->
     <style>
         .navbar {
+            user-select: none; /* Standard syntax */
             overflow: hidden;
             background-color: #333;
             position: fixed;
@@ -70,6 +71,8 @@
             margin: 0;
             padding: 0;
 
+            touch-action: none;
+
             /*border-style: solid;*/
             /*border-color: #A4FCD4;*/
             /*border-width: 20px;*/
@@ -89,7 +92,6 @@
 document.getElementById('fileDropdown').style.display = 'none';
 
 function toggleDropdown() {
-    console.log(document.getElementById('fileDropdown').style.display)
     if (document.getElementById('fileDropdown').style.display == 'block') {
         document.getElementById('fileDropdown').style.display = 'none';
     } else {
@@ -123,9 +125,7 @@ var touchDown = false;
 var prevX = 0;
 var prevY = 0;
 
-canvas.addEventListener("touchstart", function(e) {
-    touchDown = true;
-
+canvas.addEventListener("pointerdown", function(e) {
     prevX = e.x;
     prevY = e.y;
 
@@ -135,7 +135,9 @@ canvas.addEventListener("touchstart", function(e) {
     ctx.fill();
 })
 
-canvas.addEventListener("touchmove", function(e) {
+canvas.addEventListener("pointermove", function(e) {
+    // event.preventDefault(); // no scroll
+    
     if (touchDown) {
         // get length from previous xy to current xy and linear interpolate to draw a solid line
         var c = Math.ceil( Math.sqrt((e.x - prevX) ** 2 + (e.y - prevY) ** 2) );
@@ -163,9 +165,6 @@ canvas.addEventListener("touchmove", function(e) {
     }
 })
 
-canvas.addEventListener("touchend", function(e) {
-    touchDown = false;
-})
 
 // or with mouse for testing
 
@@ -179,8 +178,6 @@ canvas.addEventListener("mousedown", function(e) {
     ctx.beginPath();
     ctx.arc(e.x, e.y, drawSize, 0, 2 * Math.PI, false);
     ctx.fill();
-
-    console.log("Hi");
 })
 
 canvas.addEventListener("mousemove", function(e) {
@@ -214,6 +211,12 @@ canvas.addEventListener("mousemove", function(e) {
 canvas.addEventListener("mouseup", function(e) {
     touchDown = false;
 })
+
+window.oncontextmenu = function(event) {
+     event.preventDefault();
+     event.stopPropagation();
+     return false;
+};
 
 </script>    
 </body>
