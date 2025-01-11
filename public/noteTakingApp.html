@@ -3,7 +3,7 @@
     <!-- Navigation / Drawing Menu - Always on Top -->
     <style>
         .navbar {
-            user-select: none; /* Standard syntax */
+            user-select: none; /* Prevent user from copying text */
             overflow: hidden;
             background-color: #333;
             position: fixed;
@@ -29,6 +29,7 @@
 
         /* Dropdown Content (Hidden by Default) */
         .dropdown-content {
+            user-select: none;
             display: none;
             margin-top: 50px;
             position: fixed;
@@ -39,7 +40,7 @@
         }
 
         /* Links inside the dropdown */
-        .dropdown-content a {
+        .dropdown-content div {
             color: black;
             padding: 12px 16px;
             text-decoration: none;
@@ -50,28 +51,32 @@
     <div class="navbar">
         <div class="select" id="file" onclick="toggleDropdown();">File</div>
         <div class="dropdown-content" id="fileDropdown">
-            <a href="#">Link 1</a>
+            <div onclick="saveNote();">Save</div>
+            <input type="file"> Upload Note </input>
             <a href="#">Link 2</a>
             <a href="#">Link 3</a>
         </div>
         
-        <input class="select" id="drawSize" oninput="setDrawSize();" type="range" min="2" max="50" value="2" step="2">
+        <input class="select" id="drawSize" oninput="setDrawSize();" type="range" min="2" max="100" value="2" step="2">
 
         <div class="select" onclick="setDrawColor('Black');" style="background-color: Black;">Black</div>
         <div class="select" onclick="setDrawColor('Blue');" style="background-color: Blue;">Blue</div>
         <div class="select" onclick="setDrawColor('Red');" style="background-color: Red;">Red</div>
         <div class="select" onclick="setDrawColor('Green');" style="background-color: Green;">Green</div>
         <div class="select" onclick="setDrawColor('Purple');" style="background-color: Purple;">Purple</div>
+        <div class="select" onclick="setDrawColor('Eraser');" style="background-color: Pink;">Eraser</div>
 
     </div>
 
     <!-- Drawing Canvas -->
     <style>
         #drawingCanvas {
-            margin: 0;
+            /* margin-top: 50px; */
             padding: 0;
 
             touch-action: none;
+
+            background-image: url("college-ruled-lined-paper_191200.png");
 
             /*border-style: solid;*/
             /*border-color: #A4FCD4;*/
@@ -114,12 +119,14 @@ function setDrawSize() {
 var canvas = document.getElementById("drawingCanvas");
 var ctx = canvas.getContext("2d");
 
-// pdf A4 size: 8.3" by 11.7" 400 PPI
+// pdf A4 size: 8.3" by 11.7" 200 PPI
 // https://stackoverflow.com/questions/3455016/how-are-pdf-sizes-specified
-canvas.width = 3307;  
-canvas.height = 4677;
+canvas.width = 1654;  
+canvas.height = 2339;
 // canvas.style.width = ""+ window.innerWidth +"px";   // stretch canvas to fit screen
 // canvas.style.height = ""+ window.innerHeight +"px"; 
+canvas.style.marginTop = "50px";
+canvas.style.marginLeft = "0px";
 
 // draw college rule lines
 
@@ -133,41 +140,67 @@ canvas.height = 4677;
 // ctx.fillStyle = "Red";
 // ctx.fillRect(Math.floor( 1.25/8.3 * canvas.width ), 0, 2, canvas.height);
 
-var collegePaper = new Image();
-    collegePaper.src = "college-ruled-lined-paper_191200.png";
-    collegePaper.onload = function() {
-        ctx.drawImage(collegePaper, 0, 0, canvas.width, canvas.height);
-    }
+// var collegePaper = new Image();
+//     collegePaper.src = "college-ruled-lined-paper_191200.png";
+//     collegePaper.onload = function() {
+//         ctx.drawImage(collegePaper, 0, 0, canvas.width, canvas.height);
+//     }
 
+//=========== File Loading =======================
+function loadFile(name) {
+    var note = window.createImageBitmap(myFile);
 
-// ctx.fillStyle = drawColor;
-// ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+//================================================
 
 var touchDown = false;
 var prevX = 0;
 var prevY = 0;
 
 canvas.addEventListener("pointerdown", function(e) {
+    // use pen to draw, touch to scroll and zoom (maybe use multitouch to scroll/ zoom and check for single touch to write)
+
+    // ctx.font = "20px Georgia";
+    // ctx.font = "30px Verdana";
+    // ctx.clearRect(0, 0, 2500, 1500);
+    // ctx.fillText("" + canvas.style.marginLeft.match(/\d+/)[0], 250, 250);
+   
+    if (e.pointerType == "touch") {
+        // finger touch
+        // do scrolling/ zooming
+        canvas.style.touchAction = "auto";
+        return;
+    } else {
+        // stylus
+        // do only drawing
+        // do scrolling/ zooming
+        canvas.style.touchAction = "none";
+    }
     touchDown = true;
 
-    var x = e.x + window.pageXOffset;
-    var y = e.y + window.pageYOffset
+    var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
+    var y = e.y + window.pageYOffset - Number(canvas.style.marginTop.match(/\d+/)[0]);
 
     prevX = x;
     prevY = y;
 
-    ctx.fillStyle = drawColor;
-    ctx.beginPath();
-    ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
-    ctx.fill();
+    if (drawColor != "Eraser") {
+        ctx.beginPath();
+        ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
+        ctx.fillStyle = drawColor;
+        ctx.fill();
+    } else {
+        ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
+    }
+   
 })
 
 canvas.addEventListener("pointermove", function(e) {
     // event.preventDefault(); // no scroll
     
-    if (touchDown) {
-        var x = e.x + window.pageXOffset;
-        var y = e.y + window.pageYOffset
+    if (touchDown) { 
+        var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
+        var y = e.y + window.pageYOffset - Number(canvas.style.marginTop.match(/\d+/)[0]);
 
         // get length from previous xy to current xy and linear interpolate to draw a solid line
         var c = Math.ceil( Math.sqrt((x - prevX) ** 2 + (y - prevY) ** 2) );
@@ -178,17 +211,25 @@ canvas.addEventListener("pointermove", function(e) {
 
         if (c > drawSize) {
             for (var i = 0; i * drawSize < c; i++) {
-                ctx.fillStyle = drawColor;
-                ctx.beginPath();
-                ctx.arc(prevX + dirX * drawSize * i, prevY + dirY * drawSize * i, drawSize, 0, 2 * Math.PI, false);
-                ctx.fill();
+                if (drawColor != "Eraser") {
+                    ctx.beginPath();
+                    ctx.arc(prevX + dirX * drawSize * i, prevY + dirY * drawSize * i, drawSize, 0, 2 * Math.PI, false);
+                    ctx.fillStyle = drawColor;
+                    ctx.fill();
+                } else {
+                    ctx.clearRect(prevX + dirX * drawSize * i - drawSize/2, prevY + dirY * drawSize * i - drawSize/2, drawSize, drawSize);
+                }
             }
         }
 
-        ctx.fillStyle = drawColor;
-        ctx.beginPath();
-        ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
-        ctx.fill();
+        if (drawColor != "Eraser") {
+            ctx.beginPath();
+            ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
+            ctx.fillStyle = drawColor;
+            ctx.fill();
+        } else {
+            ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
+        }
 
         prevX = x;
         prevY = y;
