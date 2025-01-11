@@ -52,9 +52,7 @@
         <div class="select" id="file" onclick="toggleDropdown();">File</div>
         <div class="dropdown-content" id="fileDropdown">
             <div onclick="saveNote();">Save</div>
-            <input type="file"> Upload Note </input>
-            <a href="#">Link 2</a>
-            <a href="#">Link 3</a>
+            <input id="inputFile" type="file" accept="image/png, image/jpeg" oninput="loadFile();"></input>
         </div>
         
         <input class="select" id="drawSize" oninput="setDrawSize();" type="range" min="2" max="100" value="2" step="2">
@@ -147,8 +145,18 @@ canvas.style.marginLeft = "0px";
 //     }
 
 //=========== File Loading =======================
-function loadFile(name) {
-    var note = window.createImageBitmap(myFile);
+function loadFile() {
+    var note = new Image();
+        note.src = URL.createObjectURL(document.getElementById("inputFile").files[0]);
+        note.onload = function() {
+            ctx.drawImage(note, 0, 0);
+        }
+    // var note = window.createImageBitmap(myFile);
+}
+//================================================
+
+//============== Save Note =======================
+function saveNote() {
 
 }
 //================================================
