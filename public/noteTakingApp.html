@@ -198,6 +198,7 @@ function saveNote() {
 // https://stackoverflow.com/questions/3455016/how-are-pdf-sizes-specified
 const PAGE_WIDTH = 1654;
 const PAGE_HEIGHT = 2339;
+const PAGE_MARGIN_TOP = 50; // pixels
 
 var pageCount = 0;
 
@@ -221,7 +222,7 @@ function navigatePages(dir) {
         c.width = PAGE_WIDTH;  
         c.height = PAGE_HEIGHT;
         c.classList.add('drawingCanvas');
-        c.style.marginTop = "50px";
+        c.style.marginTop = PAGE_MARGIN_TOP + "px";
         c.style.marginLeft = "0px";
 
         document.body.appendChild(c);
@@ -239,114 +240,12 @@ navigatePages("new");
 
 //================================================
 var touchDown = {};
-
-// var touchDown = false;
 var prevX = 0;
 var prevY = 0;
 
-// // store which canvas (page) touch started in
-// var index;
-// var canvas;
-// var ctx;
-
-// window.addEventListener("pointerdown", function(e) {
-//     // use pen to draw, touch to scroll and zoom (maybe use multitouch to scroll/ zoom and check for single touch to write)
-
-//     // ctx.font = "20px Georgia";
-//     // ctx.font = "30px Verdana";
-//     // ctx.clearRect(0, 0, 2500, 1500);
-//     // ctx.fillText("" + canvas.style.marginLeft.match(/\d+/)[0], 250, 250);
-
-//     index = Math.floor((window.pageYOffset + e.y) / PAGE_HEIGHT);
-//     document.getElementById("pageNumDisplay").innerText = "Page: " + (index + 1) + " of " + pageCount;
-//     canvas = canvases[index];
-//     ctx = ctxs[index];
-
-//     if (e.pointerType == "touch") {
-//         // finger touch
-//         // do scrolling/ zooming
-//         canvas.style.touchAction = "auto";
-//         return;
-//     } else {
-//         // stylus
-//         // do only drawing
-//         // do scrolling/ zooming
-//         canvas.style.touchAction = "none";
-//     }
-    
-//     touchDown = true;
-
-//     var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
-//     var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
-
-//     prevX = x;
-//     prevY = y;
-
-//     if (drawColor != "Eraser") {
-//         ctx.beginPath();
-//         ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
-//         ctx.fillStyle = drawColor;
-//         ctx.fill();
-//     } else {
-//         ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
-//     }
-   
-// })
-
-// window.addEventListener("pointermove", function(e) {
-//     // event.preventDefault(); // no scroll
-    
-//     if (touchDown) { 
-//         var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
-//         var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
-
-//         // get length from previous xy to current xy and linear interpolate to draw a solid line
-//         var c = Math.ceil( Math.sqrt((x - prevX) ** 2 + (y - prevY) ** 2) );
-
-//         // normalized direction of stroke
-//         var dirX = (x - prevX) / c; 
-//         var dirY = (y - prevY) / c;
-
-//         if (c > drawSize) {
-//             for (var i = 0; i * drawSize < c; i++) {
-//                 if (drawColor != "Eraser") {
-//                     ctx.beginPath();
-//                     ctx.arc(prevX + dirX * drawSize * i, prevY + dirY * drawSize * i, drawSize, 0, 2 * Math.PI, false);
-//                     ctx.fillStyle = drawColor;
-//                     ctx.fill();
-//                 } else {
-//                     ctx.clearRect(prevX + dirX * drawSize * i - drawSize/2, prevY + dirY * drawSize * i - drawSize/2, drawSize, drawSize);
-//                 }
-//             }
-//         }
-
-//         if (drawColor != "Eraser") {
-//             ctx.beginPath();
-//             ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
-//             ctx.fillStyle = drawColor;
-//             ctx.fill();
-//         } else {
-//             ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
-//         }
-
-//         prevX = x;
-//         prevY = y;
-//     }
-// })
-
-// window.addEventListener("pointerup", function(e) {
-//     touchDown = false;
-// })
-
 function addEventListenersToCanvas(canvas, ctx, index) {
     canvas.addEventListener("pointerdown", function(e) {
-        document.getElementById("pageNumDisplay").innerText = "Page: " + (index + 1) + " of " + pageCount;
         // use pen to draw, touch to scroll and zoom (maybe use multitouch to scroll/ zoom and check for single touch to write)
-
-        // ctx.font = "20px Georgia";
-        // ctx.font = "30px Verdana";
-        // ctx.clearRect(0, 0, 2500, 1500);
-        // ctx.fillText("" + canvas.style.marginLeft.match(/\d+/)[0], 250, 250);
     
         if (e.pointerType == "touch") {
             // finger touch
@@ -430,6 +329,19 @@ function addEventListenersToCanvas(canvas, ctx, index) {
         touchDown = {};
     })
 }
+
+// register event for updating page number on scroll
+// throttle so can only be called every n milliseconds
+var scrollTimeout = 50;
+var updatePageReady = true;
+window.addEventListener("scroll", function(e) {
+    if (updatePageReady) {
+        updatePageReady = false;
+        document.getElementById("pageNumDisplay").innerText = "Page: " + (1 + Math.floor(window.pageYOffset / (PAGE_HEIGHT + PAGE_MARGIN_TOP))) + " of " + pageCount;
+
+        setTimeout(function(){ updatePageReady = true; }, scrollTimeout);
+    }
+})
 
 // window.oncontextmenu = function(event) {
 //      event.preventDefault();
