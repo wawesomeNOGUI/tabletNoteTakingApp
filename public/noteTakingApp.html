@@ -74,6 +74,8 @@
         </div>
         
         <input class="select" id="drawSize" oninput="setDrawSize();" type="range" min="2" max="100" value="2" step="2">
+        <input class="select" style="display: none;" id="eraseSize" oninput="setEraseSize();" type="range" min="4" max="150" value="30" step="2">
+
 
         <div class="select" onclick="setDrawColor('Black');" style="background-color: Black;">Black</div>
         <div class="select" onclick="setDrawColor('Blue');" style="background-color: Blue;">Blue</div>
@@ -129,14 +131,28 @@ function toggleDropdown() {
 }
 
 // draw functions from html buttons
-drawColor = "Black";
+var drawColor = "Black";
 function setDrawColor(c) {
     drawColor = c;
+
+    // make sure draw size or eraser size slider present
+    if (c == "Eraser") {
+        document.getElementById("drawSize").style.display = "none";
+        document.getElementById("eraseSize").style.display = "block";
+    } else {
+        document.getElementById("drawSize").style.display = "block";
+        document.getElementById("eraseSize").style.display = "none";
+    }
 }
 
-drawSize = 2;
+var drawSize = 2;
 function setDrawSize() {
     drawSize = document.getElementById("drawSize").value;
+}
+
+var eraseSize = 30;
+function setEraseSize() {
+    eraseSize = document.getElementById("eraseSize").value;
 }
 
 // draw college rule lines
@@ -289,7 +305,7 @@ function addEventListenersToCanvas(canvas, ctx, index) {
         } else {
             // stylus
             // do only drawing
-            // do scrolling/ zooming
+            // no scrolling/ zooming
             canvas.style.touchAction = "none";
         }
         
@@ -309,7 +325,7 @@ function addEventListenersToCanvas(canvas, ctx, index) {
             ctx.fillStyle = drawColor;
             ctx.fill();
         } else {
-            ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
+            ctx.clearRect(x - eraseSize/2, y - eraseSize/2, eraseSize, eraseSize);
         }
     
     })
@@ -347,7 +363,7 @@ function addEventListenersToCanvas(canvas, ctx, index) {
                 ctx.fillStyle = drawColor;
                 ctx.fill();
             } else {
-                ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
+                ctx.clearRect(x - eraseSize/2, y - eraseSize/2, eraseSize, eraseSize);
             }
 
             prevX = x;
