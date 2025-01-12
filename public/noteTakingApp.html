@@ -72,11 +72,16 @@
         <div class="select" onclick="setDrawColor('Purple');" style="background-color: Purple;">Purple</div>
         <div class="select" onclick="setDrawColor('Eraser');" style="background-color: Pink;">Eraser</div>
 
+        <!-- For making new pages / navigating back and forth between pages -->
+        <div class="select" onclick="navigatePages('left');">Prev Page</div>
+        <div class="select" onclick="navigatePages('right');">Next Page</div>
+        <div class="select" onclick="navigatePages('new');">New Page</div>
+
     </div>
 
     <!-- Drawing Canvas -->
     <style>
-        #drawingCanvas {
+        .drawingCanvas {
             /* margin-top: 50px; */
             padding: 0;
 
@@ -97,7 +102,7 @@
         }
     </style>
 
-    <canvas id="drawingCanvas"></canvas>
+   <!-- <canvas id="pg.1" class="drawingCanvas"></canvas> -->
 
 <script>
 // for html dropdown menu
@@ -122,18 +127,21 @@ function setDrawSize() {
     drawSize = document.getElementById("drawSize").value;
 }
 
-// initialize canvas
-var canvas = document.getElementById("drawingCanvas");
-var ctx = canvas.getContext("2d");
+// // initialize canvas
+// var canvas = document.getElementById("pg.1");
+// var ctx = canvas.getContext("2d");
 
-// pdf A4 size: 8.3" by 11.7" 200 PPI
-// https://stackoverflow.com/questions/3455016/how-are-pdf-sizes-specified
-canvas.width = 1654;  
-canvas.height = 2339;
-// canvas.style.width = ""+ window.innerWidth +"px";   // stretch canvas to fit screen
-// canvas.style.height = ""+ window.innerHeight +"px"; 
-canvas.style.marginTop = "50px";
-canvas.style.marginLeft = "0px";
+// // pdf A4 size: 8.3" by 11.7" 200 PPI
+// // https://stackoverflow.com/questions/3455016/how-are-pdf-sizes-specified
+// const PAGE_WIDTH = 1654;
+// const PAGE_HEIGHT = 2339;
+
+// canvas.width = PAGE_WIDTH;  
+// canvas.height = PAGE_HEIGHT;
+// // canvas.style.width = ""+ window.innerWidth +"px";   // stretch canvas to fit screen
+// // canvas.style.height = ""+ window.innerHeight +"px"; 
+// canvas.style.marginTop = "50px";
+// canvas.style.marginLeft = "0px";
 
 // draw college rule lines
 
@@ -182,11 +190,60 @@ function saveNote() {
 }
 //================================================
 
+//============== Multi Page Handling =============
+
+// pdf A4 size: 8.3" by 11.7" 200 PPI
+// https://stackoverflow.com/questions/3455016/how-are-pdf-sizes-specified
+const PAGE_WIDTH = 1654;
+const PAGE_HEIGHT = 2339;
+
+var pageCount = 1;
+
+// store array of page canvas and context handles
+var canvases = [];
+var ctxs = [];
+
+function navigatePages(dir) {
+    if (dir == "left") {
+
+    } else if (dir == "right") {
+
+    } else if (dir == "new") {
+        // make new page
+        pageCount++;
+
+        var c = document.createElement('canvas');
+        var ctx = c.getContext("2d");
+
+        c.id = "pg." + pageCount;
+        c.width = PAGE_WIDTH;  
+        c.height = PAGE_HEIGHT;
+        c.classList.add('drawingCanvas');
+        c.style.marginTop = "50px";
+        c.style.marginLeft = "0px";
+
+        document.body.appendChild(c);
+
+        canvases.push(c);
+        ctxs.push(ctx);
+    }
+}
+
+// make first page
+navigatePages("new");
+
+//================================================
+
 var touchDown = false;
 var prevX = 0;
 var prevY = 0;
 
-canvas.addEventListener("pointerdown", function(e) {
+// store which canvas (page) touch started in
+var index;
+var canvas;
+var ctx;
+
+window.addEventListener("pointerdown", function(e) {
     // use pen to draw, touch to scroll and zoom (maybe use multitouch to scroll/ zoom and check for single touch to write)
 
     // ctx.font = "20px Georgia";
@@ -197,18 +254,23 @@ canvas.addEventListener("pointerdown", function(e) {
     if (e.pointerType == "touch") {
         // finger touch
         // do scrolling/ zooming
-        canvas.style.touchAction = "auto";
+        // canvas.style.touchAction = "auto";
         return;
     } else {
         // stylus
         // do only drawing
         // do scrolling/ zooming
-        canvas.style.touchAction = "none";
+        // canvas.style.touchAction = "none";
     }
+
+    index = Math.floor((window.pageYOffset + e.y) / PAGE_HEIGHT);
+    canvas = canvases[index];
+    ctx = ctxs[index];
+    
     touchDown = true;
 
     var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
-    var y = e.y + window.pageYOffset - Number(canvas.style.marginTop.match(/\d+/)[0]);
+    var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
 
     prevX = x;
     prevY = y;
@@ -224,12 +286,12 @@ canvas.addEventListener("pointerdown", function(e) {
    
 })
 
-canvas.addEventListener("pointermove", function(e) {
+window.addEventListener("pointermove", function(e) {
     // event.preventDefault(); // no scroll
     
     if (touchDown) { 
         var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
-        var y = e.y + window.pageYOffset - Number(canvas.style.marginTop.match(/\d+/)[0]);
+        var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
 
         // get length from previous xy to current xy and linear interpolate to draw a solid line
         var c = Math.ceil( Math.sqrt((x - prevX) ** 2 + (y - prevY) ** 2) );
@@ -265,7 +327,7 @@ canvas.addEventListener("pointermove", function(e) {
     }
 })
 
-canvas.addEventListener("pointerup", function(e) {
+window.addEventListener("pointerup", function(e) {
     touchDown = false;
 })
 
