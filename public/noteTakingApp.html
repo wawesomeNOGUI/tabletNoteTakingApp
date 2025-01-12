@@ -204,7 +204,7 @@ async function saveNote() {
 
         tempCtx.drawImage(canvases[i], 0, 0);
 
-        save(   await new Promise(resolve => tempCanvas.toBlob(resolve)),
+        save(   await new Promise(resolve => tempCanvas.toBlob(resolve)),  // "image/jpeg", 0.8
                 document.getElementById("fileName").innerText + "_pg" + (i+1)
             );
     }
