@@ -224,6 +224,9 @@ function navigatePages(dir) {
 
         document.body.appendChild(c);
 
+        // add event listeners to this canvas
+        addEventListenersToCanvas(c, ctx, pageCount - 2);
+
         canvases.push(c);
         ctxs.push(ctx);
     }
@@ -234,84 +237,134 @@ navigatePages("new");
 
 //================================================
 
-var touchDown = false;
+var touchDown = {0: false};
 var prevX = 0;
 var prevY = 0;
 
-// store which canvas (page) touch started in
-var index;
-var canvas;
-var ctx;
+// // store which canvas (page) touch started in
+// var index;
+// var canvas;
+// var ctx;
 
-window.addEventListener("pointerdown", function(e) {
-    // use pen to draw, touch to scroll and zoom (maybe use multitouch to scroll/ zoom and check for single touch to write)
+// window.addEventListener("pointerdown", function(e) {
+//     // use pen to draw, touch to scroll and zoom (maybe use multitouch to scroll/ zoom and check for single touch to write)
 
-    // ctx.font = "20px Georgia";
-    // ctx.font = "30px Verdana";
-    // ctx.clearRect(0, 0, 2500, 1500);
-    // ctx.fillText("" + canvas.style.marginLeft.match(/\d+/)[0], 250, 250);
+//     // ctx.font = "20px Georgia";
+//     // ctx.font = "30px Verdana";
+//     // ctx.clearRect(0, 0, 2500, 1500);
+//     // ctx.fillText("" + canvas.style.marginLeft.match(/\d+/)[0], 250, 250);
    
-    if (e.pointerType == "touch") {
-        // finger touch
-        // do scrolling/ zooming
-        // canvas.style.touchAction = "auto";
-        return;
-    } else {
-        // stylus
-        // do only drawing
-        // do scrolling/ zooming
-        // canvas.style.touchAction = "none";
-    }
+//     if (e.pointerType == "touch") {
+//         // finger touch
+//         // do scrolling/ zooming
+//         // canvas.style.touchAction = "auto";
+//         return;
+//     } else {
+//         // stylus
+//         // do only drawing
+//         // do scrolling/ zooming
+//         // canvas.style.touchAction = "none";
+//     }
 
-    index = Math.floor((window.pageYOffset + e.y) / PAGE_HEIGHT);
-    canvas = canvases[index];
-    ctx = ctxs[index];
+//     index = Math.floor((window.pageYOffset + e.y) / PAGE_HEIGHT);
+//     canvas = canvases[index];
+//     ctx = ctxs[index];
     
-    touchDown = true;
+//     touchDown = true;
 
-    var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
-    var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
+//     var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
+//     var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
 
-    prevX = x;
-    prevY = y;
+//     prevX = x;
+//     prevY = y;
 
-    if (drawColor != "Eraser") {
-        ctx.beginPath();
-        ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
-        ctx.fillStyle = drawColor;
-        ctx.fill();
-    } else {
-        ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
-    }
+//     if (drawColor != "Eraser") {
+//         ctx.beginPath();
+//         ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
+//         ctx.fillStyle = drawColor;
+//         ctx.fill();
+//     } else {
+//         ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
+//     }
    
-})
+// })
 
-window.addEventListener("pointermove", function(e) {
-    // event.preventDefault(); // no scroll
+// window.addEventListener("pointermove", function(e) {
+//     // event.preventDefault(); // no scroll
     
-    if (touchDown) { 
+//     if (touchDown) { 
+//         var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
+//         var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
+
+//         // get length from previous xy to current xy and linear interpolate to draw a solid line
+//         var c = Math.ceil( Math.sqrt((x - prevX) ** 2 + (y - prevY) ** 2) );
+
+//         // normalized direction of stroke
+//         var dirX = (x - prevX) / c; 
+//         var dirY = (y - prevY) / c;
+
+//         if (c > drawSize) {
+//             for (var i = 0; i * drawSize < c; i++) {
+//                 if (drawColor != "Eraser") {
+//                     ctx.beginPath();
+//                     ctx.arc(prevX + dirX * drawSize * i, prevY + dirY * drawSize * i, drawSize, 0, 2 * Math.PI, false);
+//                     ctx.fillStyle = drawColor;
+//                     ctx.fill();
+//                 } else {
+//                     ctx.clearRect(prevX + dirX * drawSize * i - drawSize/2, prevY + dirY * drawSize * i - drawSize/2, drawSize, drawSize);
+//                 }
+//             }
+//         }
+
+//         if (drawColor != "Eraser") {
+//             ctx.beginPath();
+//             ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
+//             ctx.fillStyle = drawColor;
+//             ctx.fill();
+//         } else {
+//             ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
+//         }
+
+//         prevX = x;
+//         prevY = y;
+//     }
+// })
+
+// window.addEventListener("pointerup", function(e) {
+//     touchDown = false;
+// })
+
+function addEventListenersToCanvas(canvas, ctx, index) {
+    canvas.addEventListener("pointerdown", function(e) {
+        // use pen to draw, touch to scroll and zoom (maybe use multitouch to scroll/ zoom and check for single touch to write)
+
+        // ctx.font = "20px Georgia";
+        // ctx.font = "30px Verdana";
+        // ctx.clearRect(0, 0, 2500, 1500);
+        // ctx.fillText("" + canvas.style.marginLeft.match(/\d+/)[0], 250, 250);
+    
+        if (e.pointerType == "touch") {
+            // finger touch
+            // do scrolling/ zooming
+            // canvas.style.touchAction = "auto";
+            return;
+        } else {
+            // stylus
+            // do only drawing
+            // do scrolling/ zooming
+            // canvas.style.touchAction = "none";
+        }
+        
+        // clear other touchdowns from the other canvases and set this one to true
+        touchDown = {};
+        touchDown[index] = true;
+        console.log (index)
+
         var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
         var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
 
-        // get length from previous xy to current xy and linear interpolate to draw a solid line
-        var c = Math.ceil( Math.sqrt((x - prevX) ** 2 + (y - prevY) ** 2) );
-
-        // normalized direction of stroke
-        var dirX = (x - prevX) / c; 
-        var dirY = (y - prevY) / c;
-
-        if (c > drawSize) {
-            for (var i = 0; i * drawSize < c; i++) {
-                if (drawColor != "Eraser") {
-                    ctx.beginPath();
-                    ctx.arc(prevX + dirX * drawSize * i, prevY + dirY * drawSize * i, drawSize, 0, 2 * Math.PI, false);
-                    ctx.fillStyle = drawColor;
-                    ctx.fill();
-                } else {
-                    ctx.clearRect(prevX + dirX * drawSize * i - drawSize/2, prevY + dirY * drawSize * i - drawSize/2, drawSize, drawSize);
-                }
-            }
-        }
+        prevX = x;
+        prevY = y;
 
         if (drawColor != "Eraser") {
             ctx.beginPath();
@@ -321,15 +374,57 @@ window.addEventListener("pointermove", function(e) {
         } else {
             ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
         }
+    
+    })
 
-        prevX = x;
-        prevY = y;
-    }
-})
+    canvas.addEventListener("pointermove", function(e) {
+        // event.preventDefault(); // no scroll
+        
+        if (touchDown[index]) { 
+            var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
+            var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
 
-window.addEventListener("pointerup", function(e) {
-    touchDown = false;
-})
+            // get length from previous xy to current xy and linear interpolate to draw a solid line
+            var c = Math.ceil( Math.sqrt((x - prevX) ** 2 + (y - prevY) ** 2) );
+
+            // normalized direction of stroke
+            var dirX = (x - prevX) / c; 
+            var dirY = (y - prevY) / c;
+
+            if (c > drawSize) {
+                for (var i = 0; i * drawSize < c; i++) {
+                    if (drawColor != "Eraser") {
+                        ctx.beginPath();
+                        ctx.arc(prevX + dirX * drawSize * i, prevY + dirY * drawSize * i, drawSize, 0, 2 * Math.PI, false);
+                        ctx.fillStyle = drawColor;
+                        ctx.fill();
+                    } else {
+                        ctx.clearRect(prevX + dirX * drawSize * i - drawSize/2, prevY + dirY * drawSize * i - drawSize/2, drawSize, drawSize);
+                    }
+                }
+            }
+
+            if (drawColor != "Eraser") {
+                ctx.beginPath();
+                ctx.arc(x, y, drawSize, 0, 2 * Math.PI, false);
+                ctx.fillStyle = drawColor;
+                ctx.fill();
+            } else {
+                ctx.clearRect(x - drawSize/2, y - drawSize/2, drawSize, drawSize);
+            }
+
+            prevX = x;
+            prevY = y;
+        } else {
+            // clear other touchDowns in case weren't cleared when pointer left the other canvas
+            touchDown = {};
+        }
+    })
+
+    canvas.addEventListener("pointerup", function(e) {
+        touchDown = {};
+    })
+}
 
 // window.oncontextmenu = function(event) {
 //      event.preventDefault();
