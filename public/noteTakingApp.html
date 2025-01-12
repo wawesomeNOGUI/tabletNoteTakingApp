@@ -68,9 +68,9 @@
     <div class="navbar">
         <div class="select" id="file" onclick="toggleDropdown();">File</div>
         <div class="dropdown-content" id="fileDropdown">
-            <div id="fileName" contentEditable="true">Filename.png</div>
+            <div id="fileName" contentEditable="true">Filename</div>
             <div onclick="saveNote();">Save</div>
-            <input id="inputFile" type="file" accept="image/png, image/jpeg" oninput="loadFile();"></input>
+            <input id="inputFile" type="file" multiple accept="image/png, image/jpeg" oninput="loadFiles();"></input>
         </div>
         
         <input class="select" id="drawSize" oninput="setDrawSize();" type="range" min="2" max="100" value="2" step="2">
@@ -174,12 +174,23 @@ function setDrawSize() {
 //     }
 
 //=========== File Loading =======================
-function loadFile() {
-    var note = new Image();
-        note.src = URL.createObjectURL(document.getElementById("inputFile").files[0]);
-        note.onload = function() {
-            ctx.drawImage(note, 0, 0);
-        }
+async function loadFiles() {
+    // TODO: decide if should wipe current drawing or just append files to end, for now I think we will append
+
+    for (var i = 0; i < document.getElementById("inputFile").files.length; i++) {
+        new Promise(resolve => {
+                var note = new Image();
+                note.src = URL.createObjectURL(document.getElementById("inputFile").files[i]);
+                note.onload = function() {
+                    // make new page and draw image to it
+                    navigatePages("new");
+                    ctxs[ctxs.length - 1].drawImage(note, 0, 0);
+
+                    // resolve the promise, indicating that the image has been loaded
+                    resolve();
+                }
+            })
+    }
 }
 //================================================
 
@@ -194,11 +205,16 @@ function save( blob, filename ) {
     link.click();
 }
 
-function saveNote() {
+async function saveNote() {
     // var note = canvas.toDataURL('image/png');
-    canvas.toBlob(function(blob) {
-        save(blob, document.getElementById("fileName").innerText);
-    });
+    // save all individual pages as individual pngs
+    // TODO: look into making one long png file???
+    // TODO: look into making download overwrite old copy, probably not possible from browser (electron app?)
+    for (var i = 0; i < canvases.length; i++) {
+        save(   await new Promise(resolve => canvases[i].toBlob(resolve)),
+                document.getElementById("fileName").innerText + "_pg" + (i+1)
+            );
+    }
 }
 //================================================
 
