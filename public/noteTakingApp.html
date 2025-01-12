@@ -99,7 +99,7 @@
 
             touch-action: none;
 
-            background-image: url("college-ruled-lined-paper_191200.png");
+            background-image: url("collegeRuledPaper.png");
             background-size: cover;
 
             /*border-style: solid;*/
@@ -113,6 +113,8 @@
             image-rendering: crisp-edges; */
         }
     </style>
+
+    <img id="collegeRuledPage" hidden src="collegeRuledPaper.png" crossorigin="anonymous"></img>
 
    <!-- <canvas id="pg.1" class="drawingCanvas"></canvas> -->
 
@@ -139,39 +141,20 @@ function setDrawSize() {
     drawSize = document.getElementById("drawSize").value;
 }
 
-// // initialize canvas
-// var canvas = document.getElementById("pg.1");
-// var ctx = canvas.getContext("2d");
-
-// // pdf A4 size: 8.3" by 11.7" 200 PPI
-// // https://stackoverflow.com/questions/3455016/how-are-pdf-sizes-specified
-// const PAGE_WIDTH = 1654;
-// const PAGE_HEIGHT = 2339;
-
-// canvas.width = PAGE_WIDTH;  
-// canvas.height = PAGE_HEIGHT;
-// // canvas.style.width = ""+ window.innerWidth +"px";   // stretch canvas to fit screen
-// // canvas.style.height = ""+ window.innerHeight +"px"; 
-// canvas.style.marginTop = "50px";
-// canvas.style.marginLeft = "0px";
-
 // draw college rule lines
 
 // // draw lines down page, each 9/32" spacing
-// ctx.fillStyle = "Blue"
-// for (var i = (9/32) / 11.7 * canvas.height; i < canvas.height; i += (9/32) / 11.7 * canvas.height) {
-//     ctx.fillRect(0, Math.floor(i), canvas.width, 2);
+// tempCtx.fillStyle = "White"
+// tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+// tempCtx.fillStyle = "Blue"
+// for (var j = 4 * ((9/32) / 11.7 * tempCanvas.height); j < tempCanvas.height - 50; j += (9/32) / 11.7 * tempCanvas.height) {
+//     tempCtx.fillRect(0, Math.floor(j), tempCanvas.width, 2);
 // }
 
-// // left margin at 1.25" out of 8.3" width page
-// ctx.fillStyle = "Red";
-// ctx.fillRect(Math.floor( 1.25/8.3 * canvas.width ), 0, 2, canvas.height);
-
-// var collegePaper = document.createElement('img');
-//     collegePaper.src = "./college-ruled-lined-paper_191200.png";
-//     collegePaper.onload = function() {
-//         ctx.drawImage(collegePaper, 0, 0, canvas.width, canvas.height);
-//     }
+// // left margin at 0.75" out of 8.3" width page
+// tempCtx.fillStyle = "Red";
+// tempCtx.fillRect(Math.floor( 0.75/8.3 * tempCanvas.width ), 0, 2, tempCanvas.height);
 
 //=========== File Loading =======================
 async function loadFiles() {
@@ -206,12 +189,22 @@ function save( blob, filename ) {
 }
 
 async function saveNote() {
+    // create temporary invisible canvas to draw page background and then user drawings on top
+    var tempCanvas = document.createElement('canvas');
+    var tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = PAGE_WIDTH;  
+    tempCanvas.height = PAGE_HEIGHT;
+
     // var note = canvas.toDataURL('image/png');
     // save all individual pages as individual pngs
     // TODO: look into making one long png file???
     // TODO: look into making download overwrite old copy, probably not possible from browser (electron app?)
     for (var i = 0; i < canvases.length; i++) {
-        save(   await new Promise(resolve => canvases[i].toBlob(resolve)),
+        tempCtx.drawImage(document.getElementById("collegeRuledPage"), 0, 0, tempCanvas.width, tempCanvas.height);
+
+        tempCtx.drawImage(canvases[i], 0, 0);
+
+        save(   await new Promise(resolve => tempCanvas.toBlob(resolve)),
                 document.getElementById("fileName").innerText + "_pg" + (i+1)
             );
     }
@@ -224,6 +217,8 @@ async function saveNote() {
 // https://stackoverflow.com/questions/3455016/how-are-pdf-sizes-specified
 const PAGE_WIDTH = 1654;
 const PAGE_HEIGHT = 2339;
+// const PAGE_WIDTH = 2480;
+// const PAGE_HEIGHT = 3508;
 const PAGE_MARGIN_TOP = 50; // pixels
 
 var pageCount = 0;
