@@ -27,6 +27,16 @@
             cursor: pointer;
         }
 
+        .pageNumDisplay {
+            float: right;
+            display: block;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 12px 14px;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
         /* Dropdown Content (Hidden by Default) */
         .dropdown-content {
             user-select: none;
@@ -77,7 +87,7 @@
         <div class="select" onclick="navigatePages('right');">Next Page</div>
         <div class="select" onclick="navigatePages('new');">New Page</div>
 
-        <div id="pageNumDisplay" class="infoRight">Page: 1 of 1</div>
+        <div id="pageNumDisplay" class="pageNumDisplay">Page: 1 of 1</div>
 
     </div>
 
@@ -208,9 +218,21 @@ var ctxs = [];
 
 function navigatePages(dir) {
     if (dir == "left") {
+        var currentPage = (1 + Math.floor(window.pageYOffset / (PAGE_HEIGHT + PAGE_MARGIN_TOP)));
 
+        window.scrollTo({
+            top: (PAGE_HEIGHT + PAGE_MARGIN_TOP) * (currentPage - 2) + 1,
+            left: 0,
+            behavior: "auto",
+        });
     } else if (dir == "right") {
+        var currentPage = (1 + Math.floor(window.pageYOffset / (PAGE_HEIGHT + PAGE_MARGIN_TOP)));
 
+        window.scrollTo({
+            top: (PAGE_HEIGHT + PAGE_MARGIN_TOP) * (currentPage) + 1,
+            left: 0,
+            behavior: "auto",
+        });
     } else if (dir == "new") {
         // make new page
         pageCount++;
@@ -232,6 +254,9 @@ function navigatePages(dir) {
 
         canvases.push(c);
         ctxs.push(ctx);
+
+        // update page number display
+        document.getElementById("pageNumDisplay").innerText = "Page: " + (1 + Math.floor(window.pageYOffset / (PAGE_HEIGHT + PAGE_MARGIN_TOP))) + " of " + pageCount;
     }
 }
 
@@ -262,7 +287,6 @@ function addEventListenersToCanvas(canvas, ctx, index) {
         // clear other touchdowns from the other canvases and set this one to true
         touchDown = {};
         touchDown[index] = true;
-        console.log (index)
 
         var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
         var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
