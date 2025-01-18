@@ -89,6 +89,8 @@
         <div class="select" onclick="navigatePages('right');">Next Page</div>
         <div class="select" onclick="navigatePages('new');">New Page</div>
 
+        <div class="select" id="scrollToggle" onclick="toggleScroll();">Scroll: Off</div>
+
         <div id="pageNumDisplay" class="pageNumDisplay">Page: 1 of 1</div>
 
     </div>
@@ -127,6 +129,19 @@ function toggleDropdown() {
         document.getElementById('fileDropdown').style.display = 'none';
     } else {
         document.getElementById('fileDropdown').style.display = 'block'
+    }
+}
+
+var scrollOn = false;
+function toggleScroll() {
+    if (scrollOn) {
+        scrollOn = false;
+
+        document.getElementById("scrollToggle").innerText = "Scroll: Off";
+    } else {
+        scrollOn = true;
+
+        document.getElementById("scrollToggle").innerText = "Scroll: On";
     }
 }
 
@@ -380,6 +395,7 @@ function addEventListenersToCanvas(canvas, ctx, index) {
 
     canvas.addEventListener("pointerup", function(e) {
         touchDown = {};
+        canvas.style.touchAction = "none";
     })
 }
 
