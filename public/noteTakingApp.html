@@ -89,7 +89,9 @@
         <div class="select" onclick="navigatePages('right');">Next Page</div>
         <div class="select" onclick="navigatePages('new');">New Page</div>
 
-        <div class="select" id="scrollToggle" onclick="toggleScroll();">Scroll: Off</div>
+        <!-- Scroll Buttons -->
+        <div class="select" id="scrollDown" onclick="scrollPage('up');">/\</div>
+        <div class="select" id="scrollDown" onclick="scrollPage('down');">\/</div>
 
         <div id="pageNumDisplay" class="pageNumDisplay">Page: 1 of 1</div>
 
@@ -132,16 +134,21 @@ function toggleDropdown() {
     }
 }
 
-var scrollOn = false;
-function toggleScroll() {
-    if (scrollOn) {
-        scrollOn = false;
-
-        document.getElementById("scrollToggle").innerText = "Scroll: Off";
+const scrollLines = 5;
+function scrollPage(dir) {
+    // scroll by n page lines
+    if (dir == "up") {
+        window.scrollTo({
+            top: (window.pageYOffset - scrollLines * (9/32) / 11.7 * PAGE_HEIGHT),
+            left: 0,
+            behavior: "auto",
+        });
     } else {
-        scrollOn = true;
-
-        document.getElementById("scrollToggle").innerText = "Scroll: On";
+        window.scrollTo({
+            top: (window.pageYOffset + scrollLines * (9/32) / 11.7 * PAGE_HEIGHT),
+            left: 0,
+            behavior: "auto",
+        });
     }
 }
 
@@ -319,13 +326,13 @@ function addEventListenersToCanvas(canvas, ctx, index) {
         if (e.pointerType == "touch") {
             // finger touch
             // do scrolling/ zooming
-            canvas.style.touchAction = "auto";
+            // canvas.style.touchAction = "auto";
             return;
         } else {
             // stylus
             // do only drawing
             // no scrolling/ zooming
-            canvas.style.touchAction = "none";
+            // canvas.style.touchAction = "none";
         }
         
         // clear other touchdowns from the other canvases and set this one to true
@@ -395,7 +402,6 @@ function addEventListenersToCanvas(canvas, ctx, index) {
 
     canvas.addEventListener("pointerup", function(e) {
         touchDown = {};
-        canvas.style.touchAction = "none";
     })
 }
 
