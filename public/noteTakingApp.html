@@ -172,7 +172,11 @@ function setEraseSize() {
 
 //=========== File Loading =======================
 async function loadFiles() {
-    // TODO: decide if should wipe current drawing or just append files to end, for now I think we will append
+    // append files to end of note
+
+    // first set name field as name of uploaded file minus the pg number
+    var fName = document.getElementById("inputFile").files[0].name;
+    document.getElementById("fileName").innerText = fName.slice(0, fName.indexOf("_pg"));
 
     for (var i = 0; i < document.getElementById("inputFile").files.length; i++) {
         new Promise(resolve => {
