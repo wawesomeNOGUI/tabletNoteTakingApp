@@ -200,10 +200,37 @@ async function loadFiles() {
     var fName = document.getElementById("inputFile").files[0].name;
     document.getElementById("fileName").innerText = fName.slice(0, fName.indexOf("_pg"));
 
+    // it looks likw selecting input files doesn't neccesaarily put them in order of selection in the FileList
+    // so we will append the files to the note in order of the page number appended to the end of each file name
+
+    // format [pgNum: (FileList index)]
+    var filePgNums = new Array(document.getElementById("inputFile").files.length + 1);
+
     for (var i = 0; i < document.getElementById("inputFile").files.length; i++) {
+        // get page numbers from expressions like: name_pg5.png , name_pg66.png , name_pg5 (1).png
+        var pgNum = document.getElementById("inputFile").files[i].name.slice(fName.indexOf("_pg") + 3);
+        // find first non numeric character after the "_pg"
+        pgNum = Number(pgNum.slice(0, pgNum.search(/\D/)));
+
+        if (filePgNums[pgNum] != undefined) {
+            window.alert("Repeated page number!! Page: " + pgNum);
+        }
+
+        filePgNums[pgNum] = i;
+    }
+
+    // console.log(filePgNums)
+    
+    // append pages to note in order
+    for (var i = 1; i < filePgNums.length; i++) {   
+        // console.log("Page: " + i + " found at index: " + filePgNums[i]);
+
+        if (filePgNums[i] == undefined)
+            continue;
+
         new Promise(resolve => {
                 var note = new Image();
-                note.src = URL.createObjectURL(document.getElementById("inputFile").files[i]);
+                note.src = URL.createObjectURL(document.getElementById("inputFile").files[filePgNums[i]]);
                 note.onload = function() {
                     // make new page and draw image to it
                     navigatePages("new");
