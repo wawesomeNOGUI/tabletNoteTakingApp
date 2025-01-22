@@ -228,18 +228,18 @@ async function loadFiles() {
         if (filePgNums[i] == undefined)
             continue;
 
-        new Promise(resolve => {
-                var note = new Image();
-                note.src = URL.createObjectURL(document.getElementById("inputFile").files[filePgNums[i]]);
-                note.onload = function() {
-                    // make new page and draw image to it
-                    navigatePages("new");
-                    ctxs[ctxs.length - 1].drawImage(note, 0, 0);
+        await new Promise(resolve => {
+                    var note = new Image();
+                    note.src = URL.createObjectURL(document.getElementById("inputFile").files[filePgNums[i]]);
+                    note.onload = function() {
+                        // make new page and draw image to it
+                        navigatePages("new");
+                        ctxs[ctxs.length - 1].drawImage(note, 0, 0);
 
-                    // resolve the promise, indicating that the image has been loaded
-                    resolve();
-                }
-            })
+                        // resolve the promise, indicating that the image has been loaded
+                        resolve();
+                    }
+                })        
     }
 }
 //================================================
