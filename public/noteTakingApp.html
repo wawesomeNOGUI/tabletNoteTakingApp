@@ -324,6 +324,8 @@ function navigatePages(dir) {
         c.classList.add('drawingCanvas');
         c.style.marginTop = PAGE_MARGIN_TOP + "px";
         c.style.marginLeft = "0px";
+        c.style.width = window.innerWidth + "px";                                           // keep same aspect ratio but make page width fit screen width
+        c.style.height = Math.round(PAGE_HEIGHT / PAGE_WIDTH * window.innerWidth) + "px";
 
         document.body.appendChild(c);
 
@@ -366,8 +368,8 @@ function addEventListenersToCanvas(canvas, ctx, index) {
         touchDown = {};
         touchDown[index] = true;
 
-        var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
-        var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
+        var x = PAGE_WIDTH/window.innerWidth * (e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]));
+        var y = PAGE_HEIGHT/Number(canvas.style.height.slice(0, -2)) * (e.y + window.pageYOffset - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1)) - (index * PAGE_HEIGHT);
 
         prevX = x;
         prevY = y;
@@ -387,8 +389,8 @@ function addEventListenersToCanvas(canvas, ctx, index) {
         // event.preventDefault(); // no scroll
         
         if (touchDown[index]) { 
-            var x = e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]);
-            var y = e.y + window.pageYOffset - (index * PAGE_HEIGHT) - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1);
+            var x = PAGE_WIDTH/window.innerWidth * (e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]));
+            var y = PAGE_HEIGHT/Number(canvas.style.height.slice(0, -2)) * (e.y + window.pageYOffset - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1)) - (index * PAGE_HEIGHT);
 
             // get length from previous xy to current xy and linear interpolate to draw a solid line
             var c = Math.ceil( Math.sqrt((x - prevX) ** 2 + (y - prevY) ** 2) );
