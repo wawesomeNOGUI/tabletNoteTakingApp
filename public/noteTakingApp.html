@@ -139,13 +139,13 @@ function scrollPage(dir) {
     // scroll by n page lines
     if (dir == "up") {
         window.scrollTo({
-            top: (window.pageYOffset - scrollLines * (9/32) / 11.7 * PAGE_HEIGHT),
+            top: (window.pageYOffset - scrollLines * (9/32) / 11.7 * PAGE_DISPLAY_HEIGHT),
             left: 0,
             behavior: "auto",
         });
     } else {
         window.scrollTo({
-            top: (window.pageYOffset + scrollLines * (9/32) / 11.7 * PAGE_HEIGHT),
+            top: (window.pageYOffset + scrollLines * (9/32) / 11.7 * PAGE_DISPLAY_HEIGHT),
             left: 0,
             behavior: "auto",
         });
@@ -287,6 +287,8 @@ const PAGE_HEIGHT = 2339;
 // const PAGE_WIDTH = 2480;
 // const PAGE_HEIGHT = 3508;
 const PAGE_MARGIN_TOP = 50; // pixels
+const PAGE_DISPLAY_WIDTH = window.innerWidth;
+const PAGE_DISPLAY_HEIGHT = Math.round(PAGE_HEIGHT / PAGE_WIDTH * window.innerWidth);
 
 var pageCount = 0;
 
@@ -296,18 +298,18 @@ var ctxs = [];
 
 function navigatePages(dir) {
     if (dir == "left") {
-        var currentPage = (1 + Math.floor(window.pageYOffset / (PAGE_HEIGHT + PAGE_MARGIN_TOP)));
+        var currentPage = (1 + Math.floor(window.pageYOffset / (PAGE_DISPLAY_HEIGHT + PAGE_MARGIN_TOP)));
 
         window.scrollTo({
-            top: (PAGE_HEIGHT + PAGE_MARGIN_TOP) * (currentPage - 2) + 1,
+            top: (PAGE_DISPLAY_HEIGHT + PAGE_MARGIN_TOP) * (currentPage - 2) + 1,
             left: 0,
             behavior: "auto",
         });
     } else if (dir == "right") {
-        var currentPage = (1 + Math.floor(window.pageYOffset / (PAGE_HEIGHT + PAGE_MARGIN_TOP)));
+        var currentPage = (1 + Math.floor(window.pageYOffset / (PAGE_DISPLAY_HEIGHT + PAGE_MARGIN_TOP)));
 
         window.scrollTo({
-            top: (PAGE_HEIGHT + PAGE_MARGIN_TOP) * (currentPage) + 1,
+            top: (PAGE_DISPLAY_HEIGHT + PAGE_MARGIN_TOP) * (currentPage) + 1,
             left: 0,
             behavior: "auto",
         });
@@ -324,8 +326,8 @@ function navigatePages(dir) {
         c.classList.add('drawingCanvas');
         c.style.marginTop = PAGE_MARGIN_TOP + "px";
         c.style.marginLeft = "0px";
-        c.style.width = window.innerWidth + "px";                                           // keep same aspect ratio but make page width fit screen width
-        c.style.height = Math.round(PAGE_HEIGHT / PAGE_WIDTH * window.innerWidth) + "px";
+        c.style.width = PAGE_DISPLAY_WIDTH + "px";                                           // keep same aspect ratio but make page width fit screen width
+        c.style.height = PAGE_DISPLAY_HEIGHT + "px";
 
         document.body.appendChild(c);
 
@@ -336,7 +338,7 @@ function navigatePages(dir) {
         ctxs.push(ctx);
 
         // update page number display
-        document.getElementById("pageNumDisplay").innerText = "Page: " + (1 + Math.floor(window.pageYOffset / (PAGE_HEIGHT + PAGE_MARGIN_TOP))) + " of " + pageCount;
+        document.getElementById("pageNumDisplay").innerText = "Page: " + (1 + Math.floor(window.pageYOffset / (PAGE_DISPLAY_HEIGHT + PAGE_MARGIN_TOP))) + " of " + pageCount;
     }
 }
 
@@ -369,7 +371,7 @@ function addEventListenersToCanvas(canvas, ctx, index) {
         touchDown[index] = true;
 
         var x = PAGE_WIDTH/window.innerWidth * (e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]));
-        var y = PAGE_HEIGHT/Number(canvas.style.height.slice(0, -2)) * (e.y + window.pageYOffset - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1)) - (index * PAGE_HEIGHT);
+        var y = PAGE_HEIGHT/PAGE_DISPLAY_HEIGHT * (e.y + window.pageYOffset - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1)) - (index * PAGE_HEIGHT);
 
         prevX = x;
         prevY = y;
@@ -390,7 +392,7 @@ function addEventListenersToCanvas(canvas, ctx, index) {
         
         if (touchDown[index]) { 
             var x = PAGE_WIDTH/window.innerWidth * (e.x + window.pageXOffset - Number(canvas.style.marginLeft.match(/\d+/)[0]));
-            var y = PAGE_HEIGHT/Number(canvas.style.height.slice(0, -2)) * (e.y + window.pageYOffset - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1)) - (index * PAGE_HEIGHT);
+            var y = PAGE_HEIGHT/PAGE_DISPLAY_HEIGHT * (e.y + window.pageYOffset - Number(canvas.style.marginTop.match(/\d+/)[0]) * (index + 1)) - (index * PAGE_HEIGHT);
 
             // get length from previous xy to current xy and linear interpolate to draw a solid line
             var c = Math.ceil( Math.sqrt((x - prevX) ** 2 + (y - prevY) ** 2) );
@@ -441,7 +443,7 @@ var updatePageReady = true;
 window.addEventListener("scroll", function(e) {
     if (updatePageReady) {
         updatePageReady = false;
-        document.getElementById("pageNumDisplay").innerText = "Page: " + (1 + Math.floor(window.pageYOffset / (PAGE_HEIGHT + PAGE_MARGIN_TOP))) + " of " + pageCount;
+        document.getElementById("pageNumDisplay").innerText = "Page: " + (1 + Math.floor(window.pageYOffset / (PAGE_DISPLAY_HEIGHT + PAGE_MARGIN_TOP))) + " of " + pageCount;
 
         setTimeout(function(){ updatePageReady = true; }, scrollTimeout);
     }
