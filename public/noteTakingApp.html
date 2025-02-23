@@ -93,6 +93,9 @@
         <div class="select" id="scrollDown" onclick="scrollPage('up');">/\</div>
         <div class="select" id="scrollDown" onclick="scrollPage('down');">\/</div>
 
+        <!-- Fullscreen Mode -->
+        <div class="select" style="float: right;" id="fullscreen" onclick="fullscreen();">[]</div>
+
         <div id="pageNumDisplay" class="pageNumDisplay">Page: 1 of 1</div>
 
     </div>
@@ -175,6 +178,14 @@ function setDrawSize() {
 var eraseSize = 30;
 function setEraseSize() {
     eraseSize = document.getElementById("eraseSize").value;
+}
+
+function fullscreen() {
+    if (document.fullscreen) {
+        document.exitFullscreen();
+    } else {
+        document.documentElement.requestFullscreen();
+    }
 }
 
 // draw college rule lines
